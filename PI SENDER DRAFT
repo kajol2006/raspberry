@@ -1,0 +1,34 @@
+import serial
+import time
+from serial.tools import list_ports
+
+# Auto-detect serial port for LoRa
+def detect_lora_port():
+    ports = list_ports.comports()
+    for port in ports:
+        # Check common Raspberry Pi serial ports
+        if "ttyAMA" in port.device or "serial0" in port.device:
+            return port.device
+    return None
+
+lora_port = detect_lora_port()
+if not lora_port:
+    print("LoRa module not detected!")
+    exit()
+
+# Serial configuration
+ser = serial.Serial(lora_port, 9600, timeout=1)
+time.sleep(2)  # Wait for serial to initialize
+
+print(f"LoRa detected on {lora_port}")
+
+# Send messages
+try:
+    while True:
+        msg = input("Enter message to send: ")
+        ser.write(msg.encode('utf-8'))
+        print(f"Sent: {msg}")
+        time.sleep(0.5)
+except KeyboardInterrupt:
+    print("Exiting sender...")
+    ser.close()
