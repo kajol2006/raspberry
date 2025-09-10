@@ -1,0 +1,33 @@
+import serial
+
+class SX126x:
+    def __init__(self, serial_port="/dev/serial0", baudrate=9600):
+        self.ser = serial.Serial(serial_port, baudrate, timeout=1)
+        self.ser.flushInput()
+
+    def receive(self):
+        """Receive plain text message over LoRa"""
+        if self.ser.in_waiting > 0:
+            data = self.ser.readline().decode("utf-8", errors="ignore").strip()
+            return data
+        return None
+
+    def close(self):
+        self.ser.close()
+
+
+if __name__ == "__main__":
+    node = SX126x(serial_port="/dev/serial0")
+
+    print("LoRa Receiver Interface (Raspberry Pi + LoRa HAT)")
+    print("Waiting for messages... Press Ctrl+C to exit")
+
+    try:
+        while True:
+            msg = node.receive()
+            if msg:
+                print(f"Received: {msg}")
+
+    except KeyboardInterrupt:
+        node.close()
+        print("\nExiting...")
