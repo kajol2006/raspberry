@@ -1,33 +1,32 @@
 import serial
+import serial.tools.list_ports
 
-class SX126x:
-    def __init__(self, serial_port="/dev/serial0", baudrate=9600):
-        self.ser = serial.Serial(serial_port, baudrate, timeout=1)
-        self.ser.flushInput()
+class sx126x:
+    def _init_(self, serial_num):
+        self.ser = serial.Serial(serial_num, baudrate=9600, timeout=1)
 
     def receive(self):
-        """Receive plain text message over LoRa"""
-        if self.ser.in_waiting > 0:
-            data = self.ser.readline().decode("utf-8", errors="ignore").strip()
-            return data
-        return None
+        if self.ser.in_waiting:
+            data = self.ser.readline().decode().strip()
+            if data:
+                print(f"Received: {data}")
 
-    def close(self):
-        self.ser.close()
+def detect_lora_port():
+    ports = list(serial.tools.list_ports.comports())
+    for port in ports:
+        if "USB" in port.description or "Serial" in port.description:
+            return port.device
+    return "/dev/serial0"  # fallback to GPIO
 
+lora_port = detect_lora_port()
+print(f"Using LoRa on port: {lora_port}")
 
-if __name__ == "__main__":
-    node = SX126x(serial_port="/dev/serial0")
+# Initialize LoRa receiver
+receiver = sx126x(serial_num=lora_port)
 
-    print("LoRa Receiver Interface (Raspberry Pi + LoRa HAT)")
-    print("Waiting for messages... Press Ctrl+C to exit")
-
-    try:
-        while True:
-            msg = node.receive()
-            if msg:
-                print(f"Received: {msg}")
-
-    except KeyboardInterrupt:
-        node.close()
-        print("\nExiting...")
+# Receiving loop
+try:
+    while True:
+        receiver.receive()
+except KeyboardInterrupt:
+    print("Receiver stopped.")
