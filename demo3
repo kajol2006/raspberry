@@ -2,7 +2,7 @@ import serial
 import serial.tools.list_ports
 
 class sx126x:
-    def _init_(self, serial_num):
+    def __init__(self, serial_num):
         self.ser = serial.Serial(serial_num, baudrate=9600, timeout=1)
 
     def receive(self):
