@@ -1,0 +1,37 @@
+import time
+import serial
+
+class SX126x:
+    def __init__(self, serial_port="/dev/serial0", baudrate=9600):
+        self.ser = serial.Serial(serial_port, baudrate, timeout=1)
+        self.ser.flushInput()
+
+    def send(self, msg: str):
+        """Send plain text message over LoRa"""
+        data = msg.encode("utf-8")
+        self.ser.write(data)
+        time.sleep(0.2)  # allow transmission
+
+    def close(self):
+        self.ser.close()
+
+
+if _name_ == "_main_":
+    # Use /dev/serial0 when LoRa HAT is connected via GPIO
+    node = SX126x(serial_port="/dev/serial0")
+
+    print("LoRa Sender Interface (Raspberry Pi + LoRa HAT)")
+    print("Type your message and press Enter to send")
+    print("Press Ctrl+C to exit")
+
+    try:
+        while True:
+            msg = input("> ")
+            if msg.strip() == "":
+                continue
+            node.send(msg)
+            print("Message sent!")
+
+    except KeyboardInterrupt:
+        node.close()
+        print("\nExiting...")
