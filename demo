@@ -1,0 +1,52 @@
+import time
+import serial
+
+class sx126x:
+    start_freq = 850
+    offset_freq = 18
+
+    def _init_(self, serial_num, freq, addr, power, rssi):
+        self.addr = addr
+        self.freq = freq
+        self.power = power
+        self.rssi = rssi
+        self.serial_n = serial_num
+        self.ser = serial.Serial(serial_num, 9600)
+        self.ser.flushInput()
+
+    def send(self, data):
+        self.ser.write(data)
+        time.sleep(0.1)
+
+    def free_serial(self):
+        self.ser.close()
+
+
+node = sx126x(serial_num="COM5", freq=868, addr=0, power=22, rssi=False)
+
+print("LoRa Sender Interface (COM5)")
+print("Type your message and press Enter to send")
+print("Press Ctrl+C to exit")
+
+try:
+    while True:
+        msg = input("> ")  
+        if msg.strip() == "":
+            continue
+
+        
+        dest_addr = 65535
+        freq = 868
+        offset_freq = freq - 850
+
+        data = bytes([dest_addr >> 8, dest_addr & 0xFF,
+                      offset_freq,
+                      node.addr >> 8, node.addr & 0xFF,
+                      node.offset_freq]) + msg.encode()
+
+        node.send(data)
+        print("Message sent!")
+
+except KeyboardInterrupt:
+    node.free_serial()
+    print("\nExiting...")
