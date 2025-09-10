@@ -5,7 +5,7 @@ class sx126x:
     start_freq = 850
     offset_freq = 18
 
-    def _init_(self, serial_num, freq, addr, power, rssi):
+    def __init__(self, serial_num, freq, addr, power, rssi):
         self.addr = addr
         self.freq = freq
         self.power = power
