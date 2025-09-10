@@ -16,7 +16,7 @@ class SX126x:
         self.ser.close()
 
 
-if _name_ == "_main_":
+if __name__ == "_main_":
     # Use /dev/serial0 when LoRa HAT is connected via GPIO
     node = SX126x(serial_port="/dev/serial0")
 
